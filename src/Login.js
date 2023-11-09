@@ -22,19 +22,17 @@ const Login = () => {
     e.preventDefault();
   
     try {
-      console.log("here");
       const auth = getAuth();
       // Initialize Firebase Auth
       const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log("logged in successfully");
+       
         navigate("/homepage");
       } catch (err) {
-        console.log(err.code);
         if (err.code === 'auth/multi-factor-auth-required') {
           const resolver = getMultiFactorResolver(auth, err);
-          console.log(resolver);
+          
           if (resolver.hints[0].factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
             const phoneInfoOptions = {
               multiFactorHint: resolver.hints[0],
@@ -66,6 +64,7 @@ const Login = () => {
     // Complete sign-in.
      resolver.resolveSignIn(multiFactorAssertion)
       // Redirect to the homepage or any other desired page
+      console.log("User Logged in successfully");
       navigate("/homepage");
     } catch (error) {
       console.error("Error verifying OTP:", error);
