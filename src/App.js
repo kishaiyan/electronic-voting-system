@@ -1,0 +1,26 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import Login from './Login'; // Import your Login component
+import Signup from './signup';
+import Homepage from './Home_page'; 
+import MFA from './mfa';
+import MfaSetup from './mfasetup';
+
+function App() {
+  return (
+    <Router>
+      <div>
+        
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/homepage" element={<Homepage/>}/>
+          <Route path="/mfa" element={<MFA />} /> 
+          <Route path="/mfasetup" element={<MfaSetup/>}/>
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
