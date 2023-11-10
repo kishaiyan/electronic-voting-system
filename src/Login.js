@@ -6,6 +6,8 @@ PhoneAuthProvider,
 PhoneMultiFactorGenerator,
 RecaptchaVerifier,
 signInWithEmailAndPassword} from "firebase/auth";
+import './css/Login.css';
+import { getFirestore,getDoc,doc } from "firebase/firestore";
 
 
 const Login = () => {
@@ -15,20 +17,19 @@ const Login = () => {
   const [otpsent,setOtpsent]=useState(false);
   const [verificationId,setVerificationId]=useState("");
   const [resolver,setResolver]=useState("");
-  const [confirmation,setConfirmation]=useState("");
   const navigate = useNavigate();
+  const auth = getAuth();
   
   const handleLogin = async (e) => {
     e.preventDefault();
   
     try {
-      const auth = getAuth();
+      
       // Initialize Firebase Auth
       const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-       
-        navigate("/homepage");
+        navigate("/adminview");
       } catch (err) {
         if (err.code === 'auth/multi-factor-auth-required') {
           const resolver = getMultiFactorResolver(auth, err);
@@ -63,16 +64,31 @@ const Login = () => {
         PhoneMultiFactorGenerator.assertion(cred);
     // Complete sign-in.
      resolver.resolveSignIn(multiFactorAssertion)
-      // Redirect to the homepage or any other desired page
-      console.log("User Logged in successfully");
-      navigate("/homepage");
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
+     const userDocRef=doc(getFirestore(),"User",auth.currentUser.uid);
+     const userdoc=await getDoc(userDocRef);
+     if (userdoc.exists()) {
+      const userRole = userdoc.data().role;
+
+      // Check the user's role and navigate accordingly
+      if (userRole === "admin") {
+        console.log("User is an admin. Navigating to admin view.");
+        navigate("/adminview");
+      } else {
+        console.log("User is a regular user. Navigating to homepage.");
+        navigate("/homepage");
+      }
+    } else {
+      console.error("User document not found.");
     }
-  };
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+  }
+};
+
   
   return (
-    <div>
+    <div className="container">
+    <div className="card">
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <input
@@ -87,7 +103,7 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Log In</button>
+        <button className="login-button" type="submit">Log In</button>
         <div id="recaptcha"></div>
         {otpsent?<div><input
           placeholder="Enter OTP"
@@ -97,9 +113,14 @@ const Login = () => {
           <button onClick={verifyOTP}>Verifyotp</button></div>
           :
           
-          <Link to={"/signup"}>SignUp</Link>}
+          <p>
+          Don't have an account? <Link to={"/signup"}>Sign Up</Link>
+        </p>
+      
+      }
         
       </form>
+    </div>
     </div>
   );
 };

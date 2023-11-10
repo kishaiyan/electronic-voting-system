@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { RecaptchaVerifier, getAuth, onAuthStateChanged, PhoneAuthProvider, multiFactor ,MultiFactorAssertion, PhoneMultiFactorGenerator } from "firebase/auth";
+import { RecaptchaVerifier, getAuth, onAuthStateChanged, PhoneAuthProvider, multiFactor, PhoneMultiFactorGenerator } from "firebase/auth";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ const MFA = () => {
   const [phone,setPhone]=useState("");
   const [confirmation,setConfirmation]=useState(null);
   const [otp,setOtp]=useState("");
+  const [emailverified,setEmailVerified]=useState(false);
   const navigate = useNavigate();
   // Initialize Firebase Auth
   const auth = getAuth();
@@ -18,6 +19,7 @@ const MFA = () => {
       if (user) {
         // A user is signed in.
         setCurrentUser(user);
+        setEmailVerified(user.emailVerified);
       } else {
         // No user is signed in.
         setCurrentUser(null);
@@ -56,7 +58,7 @@ const MFA = () => {
       await multiFactor(currentUser).enroll(multiFactorAssertion);
       
       console.log("Enrolled successfully");
-      navigate("/homepage")
+      navigate("/")
     } catch (err) {
       console.log(err);
     }
@@ -64,40 +66,43 @@ const MFA = () => {
   
 
   return (
-    <div>
-      <h2>Enroll in Multi-Factor Authentication</h2>
-      {currentUser ? (
-       <div> <div><p>User Email: {currentUser.email}</p></div>
-       <div> <PhoneInput
-        country={"au"}
-        value={phone}
-        onChange={(e)=>setPhone("+"+e)}
-        />
-        </div>
-        <div>
-                <button onClick={sendOtp}>Verify</button>
-                <div id="recaptcha"></div>
-        </div>
-        {confirmation!=null?
-          (
-            
+    emailverified ? (
+      <div>
+        <h2>Enroll in Multi-Factor Authentication</h2>
+        {currentUser ? (
+          <div>
+            <div><p>User Email: {currentUser.email}</p></div>
             <div>
-            <input
-            type="text"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e)=>setOtp(e.target.value)}
-            />
-            <button onClick={verifyOTP}>Verify OTP</button>
-            </div>)
-          :(null)}
-        </div>
-      ) : (
-        <p>No user is signed in.</p>
-      )}
-      {/* Add your MFA form or content here */}
-    </div>
+              <PhoneInput
+                country={"au"}
+                value={phone}
+                onChange={(e) => setPhone("+" + e)}
+              />
+            </div>
+            <div>
+              <button onClick={sendOtp}>Verify</button>
+              <div id="recaptcha"></div>
+            </div>
+            {confirmation != null ? (
+              <div>
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+                <button onClick={verifyOTP}>Verify OTP</button>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <p>No user is signed in.</p>
+        )}
+        {/* Add your MFA form or content here */}
+      </div>
+    ) : (<div> Verify Your Email To Proceed</div>)
   );
+  
 };
 
 export default MFA;

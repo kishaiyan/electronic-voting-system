@@ -5,6 +5,7 @@ import Signup from './signup';
 import Homepage from './Home_page'; 
 import MFA from './mfa';
 import MfaSetup from './mfasetup';
+import Admin from './admin';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/homepage" element={<Homepage/>}/>
           <Route path="/mfa" element={<MFA />} /> 
           <Route path="/mfasetup" element={<MfaSetup/>}/>
+          <Route path='/adminview' element={<Admin/>}/>
         </Routes>
       </div>
     </Router>

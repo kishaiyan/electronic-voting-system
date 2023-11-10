@@ -1,0 +1,36 @@
+/* Add this to your CSS file or style section */
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* This will make the container take the full height of the viewport */
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 300px; /* You can adjust the width as needed */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add some styling for the form inside the card if needed */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.login-button {
+  background-color:#6495ED;
+  color: white;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  width: 30%;
+  align-self: center;
+  border-radius: 10px;
+}
+.login-button::hov{
+  color: white;
+}

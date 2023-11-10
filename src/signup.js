@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { auth, firestore } from "./config/firebase";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import DatePicker from "react-datepicker";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom"; // Import the CSS
 
@@ -14,7 +14,6 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [govid, setGovid] = useState("");
-  const [phno, setPhno]=useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
   
@@ -30,6 +29,7 @@ const SignUp = () => {
       // Store user information in Firestore
       const userRef = doc(firestore, "Voters", uid);
       await setDoc(userRef,{
+        uid,
         firstname,
         lastname,
         dob,
@@ -38,10 +38,14 @@ const SignUp = () => {
         hasVoted,
         email, // Replace with the actual Government ID
       });
-  
+      const role= doc(firestore,"User",uid);
+      await setDoc(role,{
+        email:email,
+        role:"user",
+      })
       // Redirect to a different page or show a success message
       console.log("User signed up successfully!");
-      navigate("/");
+      navigate("/mfa");
     } catch (error) {
       console.error("Error signing up:", error.message);
       if(error.response){

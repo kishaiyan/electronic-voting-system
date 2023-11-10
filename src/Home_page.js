@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, multiFactor, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
-import { collection, doc, getDoc } from 'firebase/firestore';
+import {  doc, getDoc } from 'firebase/firestore';
 import { firestore } from './config/firebase';
 
 const Homepage = () => {
   const [user, setUser] = useState("");
   const navigate = useNavigate();
-  const [currentUser, setCurrentuser] = useState(null); 
   const [isEnrolled,setIsEnrolled]= useState(false);
   const [isVerified,setIsVerified]= useState(false);
 
@@ -44,10 +43,16 @@ const Homepage = () => {
               govid: userData.govid,
             });
           }
-          if(authUser.email===true){setIsVerified(true)}
+          if(authUser.emailVerified===true){
+            console.log("is verified");
+            setIsVerified(true);
+          }
         const userMultiFactor = multiFactor(authUser);
         const enrolledFactors = userMultiFactor.enrolledFactors;
-        if(enrolledFactors.length>0){setIsEnrolled(true)}
+        
+        if(enrolledFactors.length>0){
+          console.log("isEnrolled");
+          setIsEnrolled(true)}
         console.log("Is user enrolled?", enrolledFactors.length>0);
         } catch (error) {
           console.error("Error retrieving user data:", error);
