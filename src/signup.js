@@ -4,7 +4,8 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/
 import DatePicker from "react-datepicker";
 import { doc, setDoc } from "firebase/firestore";
 import "react-datepicker/dist/react-datepicker.css";
-import { useNavigate } from "react-router-dom"; // Import the CSS
+import { useNavigate } from "react-router-dom";
+import './css/SignUp.css'; // Ensure this path matches the location of your CSS file
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -14,93 +15,96 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [govid, setGovid] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     try {
       // Create a new user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const canVote=true;
-      const hasVoted=false;
       await sendEmailVerification(auth.currentUser);
       // Get the newly created user's UID
       const uid = userCredential.user.uid;
   
       // Store user information in Firestore
       const userRef = doc(firestore, "Voters", uid);
-      await setDoc(userRef,{
+      await setDoc(userRef, {
         uid,
         firstname,
         lastname,
         dob,
         govid,
-        canVote,
-        hasVoted,
-        email, // Replace with the actual Government ID
+        canVote: true,
+        hasVoted: false,
+        email,
       });
-      const role= doc(firestore,"User",uid);
-      await setDoc(role,{
-        email:email,
-        role:"user",
-      })
-      // Redirect to a different page or show a success message
+
+      const roleRef = doc(firestore, "User", uid);
+      await setDoc(roleRef, {
+        email,
+        role: "user",
+      });
+
       console.log("User signed up successfully!");
       navigate("/mfa");
     } catch (error) {
       console.error("Error signing up:", error.message);
-      if(error.response){
-        console.log("Response data:", error.response.data);
-      }
     }
-    
   };
-  
 
   return (
-    <div>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="firstname"
-          placeholder="First Name"
-          value={firstname}
-          onChange={(e) => setFname(e.target.value)}
-        />
-        <input
-          type="text"
-          name="lastname"
-          placeholder="Last Name"
-          value={lastname}
-          onChange={(e) => setLname(e.target.value)}
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <DatePicker
-          selected={dob}
-          onChange={date => setDate(date)}
-        />
-        <input
-          type="text"
-          name="Govid"
-          placeholder="Government ID"
-          onChange={(e)=> setGovid(e.target.value)}// Update with the real Government ID
-        />
-       
-        <button type="submit">Sign Up</button>
-      </form>
+    <div className="sign-up-container">
+      <div className="sign-up-form">
+        <h2>Sign Up</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="firstname"
+            placeholder="First Name"
+            value={firstname}
+            onChange={(e) => setFname(e.target.value)}
+            className="sign-up-input"
+          />
+          <input
+            type="text"
+            name="lastname"
+            placeholder="Last Name"
+            value={lastname}
+            onChange={(e) => setLname(e.target.value)}
+            className="sign-up-input"
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="sign-up-input"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="sign-up-input"
+          />
+          <DatePicker
+            selected={dob}
+            onChange={(date) => setDate(date)}
+            className="date-picker"
+          />
+          <input
+            type="text"
+            name="Govid"
+            placeholder="Government ID"
+            value={govid}
+            onChange={(e) => setGovid(e.target.value)}
+            className="sign-up-input"
+          />
+          <button type="submit" className="sign-up-button">Sign Up</button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -24,6 +24,19 @@ const Homepage = () => {
       });
   };
 
+  const handleCastVote = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        setUser(null);
+        console.log("User vote page reached.");
+        navigate("/cast-vote");
+      })
+      .catch((error) => {
+        console.error("User can't enter the voting page", error);
+      });
+  };
+
   useEffect(() => {
     const auth = getAuth();
     
@@ -85,7 +98,9 @@ const Homepage = () => {
           ) : (
             <button onClick={handleEnrollMFA}>Enroll in MFA</button>
           )}
+          <button onClick={handleCastVote}>Cast Vote</button>
           <button onClick={handleSignOut}>Sign Out</button>
+          
         </div>
       ) : (
         <div>
