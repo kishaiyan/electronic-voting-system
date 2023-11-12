@@ -86,43 +86,46 @@ const Login = () => {
 };
 
   
-  return (
-    <div className="container">
-    <div className="card">
+return (
+  <div className="login-container">
+    <div className="login-card">
       <h2>Login</h2>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLogin} className="login-form">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="login-input"
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="login-input"
         />
         <button className="login-button" type="submit">Log In</button>
-        <div id="recaptcha"></div>
-        {otpsent?<div><input
-          placeholder="Enter OTP"
-          value={otp}
-          onChange={(e)=> setOtp(e.target.value)}
-          />
-          <button onClick={verifyOTP}>Verifyotp</button></div>
-          :
-          
-          <p>
-          Don't have an account? <Link to={"/signup"}>Sign Up</Link>
-        </p>
-      
-      }
-        
+        <div id="recaptcha" className="recaptcha"></div>
+        {otpsent ? (
+          <div>
+            <input
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="login-input"
+            />
+            <button onClick={verifyOTP} className="otp-button">Verify OTP</button>
+          </div>
+        ) : (
+          <p className="signup-link">
+            Don't have an account? <Link to={"/signup"}>Sign Up</Link>
+          </p>
+        )}
       </form>
     </div>
-    </div>
-  );
+  </div>
+);
 };
 
 export default Login;

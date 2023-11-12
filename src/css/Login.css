@@ -1,36 +1,58 @@
-/* Add this to your CSS file or style section */
-.container {
+.login-container {
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 100vh; /* This will make the container take the full height of the viewport */
-}
-
-.card {
+  align-items: center;
+  height: 100vh;
   padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 300px; /* You can adjust the width as needed */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Add some styling for the form inside the card if needed */
-form {
+.login-card {
+  width: 400px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.login-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
-.login-button {
-  background-color:#6495ED;
-  color: white;
+
+.login-input, .login-button, .otp-button {
   padding: 10px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  width: 30%;
-  align-self: center;
-  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
-.login-button::hov{
+
+.login-button, .otp-button {
+  background-color: #007bff;
   color: white;
+  cursor: pointer;
+}
+
+.signup-link {
+  text-align: center;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 600px) {
+  .login-card {
+    width: 100%;
+    margin: 0 10px;
+  }
+
+  .login-input, .login-button, .otp-button {
+    font-size: 14px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}
+
+/* Recaptcha Styles */
+.recaptcha {
+  margin-top: 10px;
+  margin-bottom: 20px;
 }

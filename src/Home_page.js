@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, multiFactor, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
-import {  doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { firestore } from './config/firebase';
+import './css/homepage.css';
 
 const Homepage = () => {
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const [isEnrolled,setIsEnrolled]= useState(false);
-  const [isVerified,setIsVerified]= useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   // Function to handle signing out
   const handleSignOut = () => {
@@ -24,17 +27,22 @@ const Homepage = () => {
       });
   };
 
+  const handleCastVote = () => {
+    navigate("/cast-vote");
+  };
+
   useEffect(() => {
     const auth = getAuth();
-    
+
     const fetchData = async (authUser) => {
-      console.log(authUser);
+      setIsLoading(true);
+      setError(null);
+
       if (authUser) {
-        
         try {
           const userDocRef = doc(firestore, 'Voters', authUser.uid);
           const userDoc = await getDoc(userDocRef);
-    
+
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setUser({
@@ -43,48 +51,48 @@ const Homepage = () => {
               govid: userData.govid,
             });
           }
-          if(authUser.emailVerified===true){
-            console.log("is verified");
+
+          if (authUser.emailVerified === true) {
             setIsVerified(true);
           }
-        const userMultiFactor = multiFactor(authUser);
-        const enrolledFactors = userMultiFactor.enrolledFactors;
-        
-        if(enrolledFactors.length>0){
-          console.log("isEnrolled");
-          setIsEnrolled(true)}
-        console.log("Is user enrolled?", enrolledFactors.length>0);
+
+          const userMultiFactor = multiFactor(authUser);
+          const enrolledFactors = userMultiFactor.enrolledFactors;
+
+          if (enrolledFactors.length > 0) {
+            setIsEnrolled(true);
+          }
+
+          setIsLoading(false);
         } catch (error) {
-          console.error("Error retrieving user data:", error);
+          setError(error);
+          setIsLoading(false);
         }
       }
-      // Check MFA status after setting user data
-      
     };
 
     const unsubscribe = onAuthStateChanged(auth, fetchData);
 
     return () => unsubscribe();
   }, []);
-  const handleEnrollMFA = async () => {
+
+  const handleEnrollMfa = () => {
     navigate("/mfa");
   };
-  
-  
-  
+
   return (
-    <div>
+    <div className="homepage-container">
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error: {error.message}</p>}
       {user ? (
         <div>
           <h2>Welcome, {user.firstname}</h2>
           <p>Email: {user.email}</p>
           <p>Your GovId: {user.govid}</p>
-          {
-           isVerified ===true && isEnrolled === true ? (
-            null
-          ) : (
-            <button onClick={handleEnrollMFA}>Enroll in MFA</button>
+          {isVerified === true && isEnrolled === true ? null : (
+            <button onClick={handleEnrollMfa}>Enroll in MFA</button>
           )}
+          <button onClick={handleCastVote}>Cast Vote</button>
           <button onClick={handleSignOut}>Sign Out</button>
         </div>
       ) : (
