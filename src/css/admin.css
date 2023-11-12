@@ -50,27 +50,6 @@ body {
   align-items: center;
 }
 
-.search-container input, .search-container button {
-  padding: 10px;
-  border: none;
-  margin-left: 10px;
-}
-
-.search-container input {
-  border-radius: 5px 0 0 5px;
-}
-
-.search-container button {
-  background: #2980b9;
-  color: #fff;
-  border-radius: 0 5px 5px 0;
-  cursor: pointer;
-}
-
-.search-container button:hover {
-  background: #3498db;
-}
-
 /* Form Section Styles */
 .form-section {
   background-color: #fff;
@@ -91,20 +70,6 @@ body {
   margin-bottom: 15px;
   border: 1px solid #ddd;
   border-radius: 4px;
-}
-
-.form-section button {
-  background: #27ae60;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.form-section button:hover {
-  background: #2ecc71;
 }
 
 /* Stats Section Styles */
@@ -145,15 +110,96 @@ body {
 
   .form-section input, .form-section textarea, .form-section select {
     width: 100%;
-  }
+  } 
 }
 
+.party-card, .candidate-card, .voter-card {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.party-buttons button, .candidate-buttons button, .voter-buttons button {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.notification-button{
+  background: #27ae60;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.add-button {
+  background: #27ae60;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.delete-button {
+  background-color: #ff6666; /* Red color */
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.edit-button {
+  background-color: #ffd166; /* Blue color */
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
 @media (max-width: 480px) {
   .nav-links a {
     padding: 15px;
   }
-
-  .search-container input, .search-container button {
-    width: 100%;
-  }
 }
+.box-container {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap; 
+  margin-bottom: 16px; 
+}
+
+
+.box {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  max-width: 400px;
+}
+
+.box h3 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.box p {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+
+
+
+
+
