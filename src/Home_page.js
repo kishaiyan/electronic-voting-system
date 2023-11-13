@@ -49,6 +49,8 @@ const Homepage = () => {
               firstname: userData.firstname,
               email: userData.email,
               govid: userData.govid,
+              isVerified:userData.isVerified,
+              canVote:userData.canVote,
             });
           }
         } catch (error) {
@@ -69,17 +71,21 @@ const Homepage = () => {
 
   return (
     <div className="homepage-container">
-      {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
       {user ? (
         <div>
-          <h2>Welcome, {user.firstname}</h2>
-          <p>Email: {user.email}</p>
+          <h2>Welcome, {user.firstname} {user.lastname}</h2>
           <p>Your GovId: {user.govid}</p>
-          {isVerified === true && isEnrolled === true ? null : (
-            <button onClick={handleEnrollMfa}>Enroll in MFA</button>
-          )}
-          <button onClick={handleCastVote}>Cast Vote</button>
+          {user.isVerified ? (
+            user.canVote ? (
+              <div>
+                <p>You are now eligible to cast your vote.</p>
+                <button onClick={handleCastVote}>Cast Vote</button>
+              </div>
+            ) : (
+              <p> You are not eligible to Vote</p>
+            )
+          ) : <p>Your profile is under verification</p>}
+          
           <button onClick={handleSignOut}>Sign Out</button>
         </div>
       ) : (
