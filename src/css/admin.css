@@ -198,6 +198,22 @@ body {
   margin: 0;
 }
 
+.edit-button {
+  background-color: #4caf50; /* Green background color */
+  color: white; /* White text color */
+  border: none; /* Remove border */
+  padding: 8px 16px; /* Add padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Display as inline block */
+  font-size: 14px; /* Set font size */
+  margin-left: 10px; /* Add margin to separate from other elements */
+  cursor: pointer; /* Add cursor pointer on hover */
+}
+
+.edit-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
 
 
 

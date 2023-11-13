@@ -1,39 +1,131 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { useNavigate } from 'react-router-dom';
+import { doc, getDoc,collection,getDocs,updateDoc, addDoc } from 'firebase/firestore';
+import { firestore } from './config/firebase';
 import DatePicker from 'react-datepicker';
-import { Link } from 'react-router-dom';
-import 'react-datepicker/dist/react-datepicker.css';
 import './css/admin.css';
-
 const Admin = () => {
+  const [user,setUser]=useState("");
   const [activeSection, setActiveSection] = useState('dashboard');
   const [newParty, setNewParty] = useState('');
   const [newCandidate, setNewCandidate] = useState('');
   const [votingDate, setVotingDate] = useState(new Date());
   const [notification, setNotification] = useState('');
+  const [candidates, setCandidates] = useState([]);
   const [showAddPartyPopup, setShowAddPartyPopup] = useState(false);
-  const [showAddCandidatePopup, setShowAddCandidatePopup] = useState(false);
+  const [showAddPopup, setShowAddPopup] = useState(false);
+  const [isEditing, setIsEditing] = useState([]);
+  const [editedCandidate, setEditedCandidate] = useState([]);
+  const [voters, setVoters] = useState([]);
+  const [party, setParties] = useState([]);
+  
+  
 
-  const parties =[
-    { id: 1, name: 'Party A', abbreviation: 'PA', leader: 'Leader A' },
-    { id: 2, name: 'Party B', abbreviation: 'PB', leader: 'Leader B' },
-    // Add more dummy parties as needed
-  ];
+ 
+  useEffect(() => {
+    const auth = getAuth();
+    
+    // Use onAuthStateChanged to get the current user once when the component mounts
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (authUser) {
+        try {
+          // Fetch user data
+          const userDocRef = doc(firestore, 'User', authUser.uid);
+          const userDoc = await getDoc(userDocRef);
 
-  const candidates = [
-    { id: 1, name: 'Candidate X', party: 'Party A', constituency: 'Constituency 1', dob: '1990-01-01', email: 'candidateX@example.com', biography: 'Lorem ipsum...', promises: 'Lorem ipsum...', image: 'path/to/image.jpg' },
-    { id: 2, name: 'Candidate Y', party: 'Party B', constituency: 'Constituency 2', dob: '1985-05-15', email: 'candidateY@example.com', biography: 'Lorem ipsum...', promises: 'Lorem ipsum...', image: 'path/to/image.jpg' },
-    // Add more dummy candidates as needed
-  ];
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUser({
+              role:userData.role,
+            });
+          }
 
-  const voters = [
-    { id: 1, govID: 'G12345', voterId: 'V12345' },
-    { id: 2, govID: 'G67890', voterId: 'V67890'},
-    // Add more dummy voters as needed
-  ];
+          // Fetch candidates data
+          const candidatesCollectionRef = collection(firestore, 'candidates');
+          const candidatesSnapshot = await getDocs(candidatesCollectionRef);
+          const candidatesData = [];
+
+          candidatesSnapshot.forEach((doc) => {
+            candidatesData.push({ id: doc.id, ...doc.data() });
+          });
+          setCandidates(candidatesData);
+          
+          // Fetch voters data
+          const votersCollectionRef = collection(firestore, 'Voters');
+          const votersSnapshot = await getDocs(votersCollectionRef);
+          const votersData = [];
+
+          votersSnapshot.forEach((doc) => {
+            votersData.push({ id: doc.id, ...doc.data() });
+          });
+
+          setVoters(votersData);
+          console.log(votersData);
+          
+
+          // Fetch parties data
+          const partiesCollectionRef = collection(firestore, 'party');
+          const partiesSnapshot = await getDocs(partiesCollectionRef);
+          const partiesData = [];
+
+          partiesSnapshot.forEach((doc) => {
+            partiesData.push({ id: doc.id, ...doc.data() });
+          });
+ 
+          setParties(partiesData);
+          
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+
+
+
+
+        
+      }
+    });
+
+    // Unsubscribe when the component unmounts
+    return () => unsubscribe();
+  }, []);
+
+  const startEditing = (candidateId) => {
+    setIsEditing(candidateId);
+    setEditedCandidate({ ...candidates.find((c) => c.id === candidateId) });
+  };
 
   const handleSignOut = () => {
     console.log("User logged off");
   };
+  const handleSaveEdit = async (e, candidateId) => {
+    e.preventDefault();
+  
+    try {
+      // Update the candidate data in Firestore
+      const candidateDocRef = doc(firestore, 'candidates', candidateId);
+      await updateDoc(candidateDocRef, {
+        firstname: editedCandidate.firstname,
+        lastname: editedCandidate.lastname,
+        party: editedCandidate.party,
+        constituency: editedCandidate.constituency,
+        // Add other fields you want to update
+      });
+  
+      // Update the local state with the edited data
+      setCandidates((prevCandidates) =>
+        prevCandidates.map((candidate) =>
+          candidate.id === candidateId ? { ...candidate, ...editedCandidate } : candidate
+        )
+      );
+  
+      // Exit editing mode
+      setIsEditing(null);
+    } catch (error) {
+      console.error('Error updating candidate:', error);
+    }
+  };
+  
 
   // Form submission handlers
 
@@ -48,9 +140,9 @@ const Admin = () => {
     // Placeholder for success message
   };
 
-  const handleDeleteParty = (partyId) => {
+  const handleDeleteParty = () => {
     // Placeholder for handling party deletion
-    console.log(`Delete party with ID ${partyId}`);
+    console.log(`Delete party with ID`);
     // Implement the logic to delete the party with the given ID
   };
 
@@ -60,28 +152,47 @@ const Admin = () => {
     // Implement the logic to modify the party with the given ID
   };
 
-  const toggleAddCandidatePopup = () => {
-    setShowAddCandidatePopup(!showAddCandidatePopup);
-  };
+ 
 
-  const handleAddCandidate = (e) => {
+  const handleAddCandidate = async(e) => {
     e.preventDefault();
-    console.log('Candidate added:', newCandidate);
-    setNewCandidate('');
-    // Placeholder for success message
+    try {
+      // Add the new candidate to the candidates collection in Firestore
+      const candidatesCollectionRef = collection(firestore, 'candidates'); // Change 'candidatesData' to your actual Firestore collection name
+      const newCandidateDocRef = await addDoc(candidatesCollectionRef, {
+        firstname: newCandidate.firstname,
+        lastname: newCandidate.lastname,
+        party: newCandidate.party,
+        constituency: newCandidate.constituency,
+        // Add other fields for a new candidate
+      });
+
+      // Retrieve the newly created candidate's ID
+      const newCandidateId = newCandidateDocRef.id;
+
+      // Update the local state with the new candidate
+      setCandidates((prevCandidates) => [
+        ...prevCandidates,
+        {
+          id: newCandidateId,
+          ...newCandidate,
+        },
+      ]);
+
+      // Reset the form and close the popup
+      setNewCandidate({
+        firstname: "",
+        lastname: "",
+        party: "",
+        constituency: "",
+        // Add other fields for a new candidate
+      });
+      setShowAddPopup(false);
+    } catch (error) {
+      console.error('Error adding candidate to Firestore:', error);
+    }
   };
 
-  const handleDeleteCandidate = (candidateId) => {
-    // Placeholder for handling candidate deletion
-    console.log(`Delete candidate with ID ${candidateId}`);
-    // Implement the logic to delete the candidate with the given ID
-  };
-
-  const handleEditCandidate = (candidateId) => {
-    // Placeholder for handling candidate modification
-    console.log(`Modify candidate with ID ${candidateId}`);
-    // Implement the logic to modify the candidate with the given ID
-  };
 
   const handleSetVotingDate = (date) => {
     setVotingDate(date);
@@ -123,7 +234,7 @@ const Admin = () => {
           <a href="#voters" onClick={() => setActiveSection('voters')}>Voters</a>
           <a href="#candidates" onClick={() => setActiveSection('candidates')}>Candidates</a>
           <a href="#parties" onClick={() => setActiveSection('parties')}>Parties</a>
-          <Link to="/homepage">Cast a Vote</Link>
+         
         </ul>
       </nav>
       <div className="admin-dashboard">
@@ -157,7 +268,7 @@ const Admin = () => {
                   </div>
                   <div className="box">
                     <h3>Total Candidates Registered</h3>
-                    <p>{totalCandidateRegistered}</p>
+                    <p></p>
                   </div>
                 </div>
               </div>
@@ -186,14 +297,16 @@ const Admin = () => {
               </div>
             </div>
           )}
+          
 
           {activeSection === 'parties' && (
             <div className="form-section">
               <h2>Parties</h2>
-              {parties.map((party) => (
+             
+              {party.map((party) => (
                 <div key={party.id} className="party-card">
                   <div>
-                    {party.name} ({party.abbreviation}) - Leader: {party.leader}
+                    {party.name} 
                   </div>
                   <div className="party-buttons">
                     <button className="edit-button" onClick={() => handleEditParty(party.id)}>Edit</button>
@@ -201,6 +314,7 @@ const Admin = () => {
                   </div>
                 </div>
               ))}
+              
               <button className="add-button" onClick={toggleAddPartyPopup}>Add more</button>
               {showAddPartyPopup && (
                 <div className="party-popup">
@@ -225,36 +339,117 @@ const Admin = () => {
               <h2>Candidates</h2>
               {candidates.map((candidate) => (
                 <div key={candidate.id} className="candidate-card">
-                  <div>
-                    {candidate.name} - Party: {candidate.party}, Constituency: {candidate.constituency}
-                  </div>
-                  <div className="candidate-buttons">
-                    <button className="edit-button" onClick={() => handleEditCandidate(candidate.id)}>Edit</button>
-                    <button className="delete-button" onClick={() => handleDeleteCandidate(candidate.id)}>Delete</button>
-                  </div>
+                  {isEditing === candidate.id ? (
+                    <div>
+                      <img
+                        src={candidate.imageURL}
+                        alt={`Image of ${candidate.firstname} ${candidate.lastname}`}
+                        style={{ width: '100px', height: '100px', paddingLeft: '20px' }}
+                      />
+                      <form onSubmit={(e) => handleSaveEdit(e, candidate.id)}>
+                        <label htmlFor={`editFirstname-${candidate.id}`}>First Name:</label>
+                        <input
+                          type="text"
+                          id={`editFirstname-${candidate.id}`}
+                          value={editedCandidate.firstname}
+                          onChange={(e) => setEditedCandidate({ ...editedCandidate, firstname: e.target.value })}
+                        />
+          
+                        <label htmlFor={`editLastname-${candidate.id}`}>Last Name:</label>
+                        <input
+                          type="text"
+                          id={`editLastname-${candidate.id}`}
+                          value={editedCandidate.lastname}
+                          onChange={(e) => setEditedCandidate({ ...editedCandidate, lastname: e.target.value })}
+                        />
+                        <label htmlFor={`editParty-${candidate.id}`}>Party:</label>
+                        <input
+                          type="text"
+                          id={`editParty-${candidate.id}`}
+                          value={editedCandidate.party}
+                          onChange={(e) => setEditedCandidate({ ...editedCandidate, party: e.target.value })}
+                        />
+                        <label htmlFor={`editConstituency-${candidate.id}`}>Constituency:</label>
+                        <input
+                          type="text"
+                          id={`editConstituency-${candidate.id}`}
+                          value={editedCandidate.constituency}
+                          onChange={(e) => setEditedCandidate({ ...editedCandidate, constituency: e.target.value })}
+                        />
+                        <button type="submit">Save</button>
+                        <button onClick={() => setIsEditing(null)}>Cancel</button>
+                      </form>
+                    
+                    </div>
+                  ) : (
+                    <div>
+                      <img
+                        src={candidate.imageURL}
+                        alt={`Image of ${candidate.firstname} ${candidate.lastname}`}
+                        style={{ width: '100px', height: '100px', paddingLeft: '20px' }}
+                      />
+                      {candidate.firstname} {candidate.lastname} - Party: {candidate.party}, Constituency: {candidate.constituency}
+                      <button className="edit-button" onClick={() => startEditing(candidate.id)}>
+                        Edit
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
-              <button className="add-button" onClick={toggleAddCandidatePopup}>Add more</button>
-              {showAddCandidatePopup && (
-                <div className="candidate-popup">
-                  <form onSubmit={handleAddCandidate}>
-                    <input type="text" placeholder="Candidate Name" value={newCandidate} onChange={(e) => setNewCandidate(e.target.value)} />
-                    <select /* ... */ >
-                      {/* Dropdown options for Party Affiliation */}
-                    </select>
-                    <input type="text" placeholder="Constituency" /* ... */ />
-                    <input type="date" placeholder="Date of Birth" /* ... */ />
-                    <input type="email" placeholder="Contact Email" /* ... */ />
-                    <textarea placeholder="Biography" /* ... */ ></textarea>
-                    <textarea placeholder="Campaign Promises" /* ... */ ></textarea>
-                    <input type="file" /* ... */ />
-                    <button type="submit">Add Candidate</button>
-                  </form>
-                </div>
-              )}
+              <button onClick={() => setShowAddPopup(true)}>Add Candidates</button>
             </div>
           )}
+          
+    {showAddPopup && (
+      <div className="popup">
+        <h3>Add New Candidate</h3>
+        <form onSubmit={handleAddCandidate}>
+          <label htmlFor="newFirstname">First Name:</label>
+          <input
+            type="text"
+            id="newFirstname"
+            value={newCandidate.firstname}
+            onChange={(e) => setNewCandidate({ ...newCandidate, firstname: e.target.value })}
+          />
 
+          <label htmlFor="newLastname">Last Name:</label>
+          <input
+            type="text"
+            id="newLastname"
+            value={newCandidate.lastname}
+            onChange={(e) => setNewCandidate({ ...newCandidate, lastname: e.target.value })}
+          />
+
+          <label htmlFor="newParty">Party:</label>
+          <input
+            type="text"
+            id="newParty"
+            value={newCandidate.party}
+            onChange={(e) => setNewCandidate({ ...newCandidate, party: e.target.value })}
+          />
+
+          <label htmlFor="newConstituency">Constituency:</label>
+          <input
+            type="text"
+            id="newConstituency"
+            value={newCandidate.constituency}
+            onChange={(e) => setNewCandidate({ ...newCandidate, constituency: e.target.value })}
+          />
+          <label htmlFor="newConstituency">Image:</label>
+          <input
+            type="text"
+            id="newImage"
+            value={newCandidate.imageURL}
+            onChange={(e) => setNewCandidate({ ...newCandidate, imageURL: e.target.value })}
+          />
+
+          {/* Add other fields you want to add for a new candidate */}
+          
+          <button type="submit">Add Candidate</button>
+          <button onClick={() => setShowAddPopup(false)}>Cancel</button>
+        </form>
+      </div>
+    )}
           {activeSection === 'voters' && (
             <div className="form-section">
               <h2>Voters</h2>

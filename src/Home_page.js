@@ -51,22 +51,9 @@ const Homepage = () => {
               govid: userData.govid,
             });
           }
-
-          if (authUser.emailVerified === true) {
-            setIsVerified(true);
-          }
-
-          const userMultiFactor = multiFactor(authUser);
-          const enrolledFactors = userMultiFactor.enrolledFactors;
-
-          if (enrolledFactors.length > 0) {
-            setIsEnrolled(true);
-          }
-
-          setIsLoading(false);
         } catch (error) {
           setError(error);
-          setIsLoading(false);
+  
         }
       }
     };

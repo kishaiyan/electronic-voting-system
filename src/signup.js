@@ -34,8 +34,9 @@ const SignUp = () => {
         lastname,
         dob,
         govid,
-        canVote: true,
+        canVote: false,
         hasVoted: false,
+        isVerified: false,
         email,
       });
 
