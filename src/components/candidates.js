@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, collection, getDocs, addDoc } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
+import '../css/admin.css';
 
 const Candidates = () => {
   const [candidates, setCandidates] = useState([]);
   const [isEditing, setIsEditing] = useState(null);
   const [editedCandidate, setEditedCandidate] = useState({});
+  const [newCandidate, setNewCandidate] = useState({
+    firstname: '',
+    lastname: '',
+    party: '',
+    constituency: '',
+    // Add other fields you want to include for a new candidate
+  });
+  const [isAddingCandidate, setIsAddingCandidate] = useState(false);
 
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -57,74 +66,152 @@ const Candidates = () => {
     }
   };
 
+  const handleAddCandidate = async (e) => {
+    e.preventDefault();
+
+    try {
+      const newCandidateRef = await addDoc(collection(firestore, 'candidates'), newCandidate);
+      const newCandidateData = { id: newCandidateRef.id, ...newCandidate };
+
+      setCandidates((prevCandidates) => [...prevCandidates, newCandidateData]);
+      setNewCandidate({
+        firstname: '',
+        lastname: '',
+        party: '',
+        constituency: '',
+        imageURL:'',
+        // Add other fields you want to include for a new candidate
+      });
+      setIsAddingCandidate(false);
+    } catch (error) {
+      console.error('Error adding new candidate:', error);
+    }
+  };
+
   return (
     <div className="form-section">
-      <h2>Candidates</h2>
-      {candidates.map((candidate) => (
-        <div key={candidate.id} className="candidate-card">
-          {isEditing === candidate.id ? (
-            <div>
-            <img
-                src={candidate.imageURL}
-                alt={`Image of ${candidate.firstname} ${candidate.lastname}`}
-                style={{ width: '100px', height: '100px', paddingLeft: '20px' }}
-              />
-              <form onSubmit={(e) => handleSaveEdit(e, candidate.id)}>
-                <label htmlFor={`editFirstname-${candidate.id}`}>First Name:</label>
-                <input
-                  type="text"
-                  id={`editFirstname-${candidate.id}`}
-                  value={editedCandidate.firstname}
-                  onChange={(e) => setEditedCandidate({ ...editedCandidate, firstname: e.target.value })}
-                />
+  <h2>Candidates</h2>
+  {candidates.map((candidate) => (
+    <div key={candidate.id} className="candidate-card">
+      {isEditing === candidate.id ? (
+        <div className="edit-candidate-container">
+          <img
+            src={candidate.imageURL}
+            alt={`Image of ${candidate.firstname} ${candidate.lastname}`}
+            style={{ width: '100px', height: '100px', paddingLeft: '20px' }}
+          />
+          <form onSubmit={(e) => handleSaveEdit(e, candidate.id)}>
+          <label htmlFor={`editFirstname-${candidate.id}`}>First Name:</label>
+          <input
+            type="text"
+            id={`editFirstname-${candidate.id}`}
+            value={editedCandidate.firstname}
+            onChange={(e) => setEditedCandidate({ ...editedCandidate, firstname: e.target.value })}
+          />
 
-                <label htmlFor={`editLastname-${candidate.id}`}>Last Name:</label>
-                <input
-                  type="text"
-                  id={`editLastname-${candidate.id}`}
-                  value={editedCandidate.lastname}
-                  onChange={(e) => setEditedCandidate({ ...editedCandidate, lastname: e.target.value })}
-                />
+          <label htmlFor={`editLastname-${candidate.id}`}>Last Name:</label>
+          <input
+            type="text"
+            id={`editLastname-${candidate.id}`}
+            value={editedCandidate.lastname}
+            onChange={(e) => setEditedCandidate({ ...editedCandidate, lastname: e.target.value })}
+          />
 
-                <label htmlFor={`editParty-${candidate.id}`}>Party:</label>
-                <input
-                  type="text"
-                  id={`editParty-${candidate.id}`}
-                  value={editedCandidate.party}
-                  onChange={(e) => setEditedCandidate({ ...editedCandidate, party: e.target.value })}
-                />
+          <label htmlFor={`editParty-${candidate.id}`}>Party:</label>
+          <input
+            type="text"
+            id={`editParty-${candidate.id}`}
+            value={editedCandidate.party}
+            onChange={(e) => setEditedCandidate({ ...editedCandidate, party: e.target.value })}
+          />
 
-                <label htmlFor={`editConstituency-${candidate.id}`}>Constituency:</label>
-                <input
-                  type="text"
-                  id={`editConstituency-${candidate.id}`}
-                  value={editedCandidate.constituency}
-                  onChange={(e) =>
-                    setEditedCandidate({ ...editedCandidate, constituency: e.target.value })
-                  }
-                />
+          <label htmlFor={`editConstituency-${candidate.id}`}>Constituency:</label>
+          <input
+            type="text"
+            id={`editConstituency-${candidate.id}`}
+            value={editedCandidate.constituency}
+            onChange={(e) =>
+              setEditedCandidate({ ...editedCandidate, constituency: e.target.value })
+            }
+          />
 
-                <button type="submit">Save</button>
-                <button onClick={() => setIsEditing(null)}>Cancel</button>
-              </form>
-            </div>
-          ) : (
-            <div>
-            <img
-                src={candidate.imageURL}
-                alt={`Image of ${candidate.firstname} ${candidate.lastname}`}
-                style={{ width: '100px', height: '100px', paddingLeft: '20px' }}
-              />
-              {candidate.firstname} {candidate.lastname} - Party: {candidate.party}, Constituency: {candidate.constituency}
-              <button className="edit-button" onClick={() => startEditingCandidate(candidate.id)}>
-                Edit
-              </button>
-            </div>
-          )}
+            <button type="submit">Save</button>
+            <button onClick={() => setIsEditing(null)}>Cancel</button>
+          </form>
         </div>
-      ))}
+      ) : (
+        <div className="candidate-info">
+          <div className="image-column">
+            <img
+              src={candidate.imageURL}
+              alt={`Image of ${candidate.firstname} ${candidate.lastname}`}
+              style={{ width: '100px', height: '100px' }}
+            />
+          </div>
+          <div className="details-column">
+            <p>Name: {candidate.firstname} {candidate.lastname}</p>
+            <p>Party: {candidate.party}</p>
+            <p>Constituency: {candidate.constituency}</p>
+          </div>
+          <button className="edit-button" onClick={() => startEditingCandidate(candidate.id)}>
+            Edit
+          </button>
+        </div>
+      )}
     </div>
+  ))}
+  {isAddingCandidate ? (
+    <div className="candidate-card">
+      <form onSubmit={handleAddCandidate}>
+      <label htmlFor="newFirstname">First Name:</label>
+      <input
+        type="text"
+        id="newFirstname"
+        value={newCandidate.firstname}
+        onChange={(e) => setNewCandidate({ ...newCandidate, firstname: e.target.value })}
+      />
+
+      <label htmlFor="newLastname">Last Name:</label>
+      <input
+        type="text"
+        id="newLastname"
+        value={newCandidate.lastname}
+        onChange={(e) => setNewCandidate({ ...newCandidate, lastname: e.target.value })}
+      />
+
+      <label htmlFor="newParty">Party:</label>
+      <input
+        type="text"
+        id="newParty"
+        value={newCandidate.party}
+        onChange={(e) => setNewCandidate({ ...newCandidate, party: e.target.value })}
+      />
+
+      <label htmlFor="newConstituency">Constituency:</label>
+      <input
+        type="text"
+        id="newConstituency"
+        value={newCandidate.constituency}
+        onChange={(e) => setNewCandidate({ ...newCandidate, constituency: e.target.value })}
+      />
+      <label htmlFor="newImageURL">imageURL:</label>
+      <input
+        type="text"
+        id="newImage"
+        value={newCandidate.imageURL}
+        onChange={(e) => setNewCandidate({ ...newCandidate, imageURL: e.target.value })}
+      />
+        <button type="submit">Add Candidate</button>
+        <button onClick={() => setIsAddingCandidate(false)}>Cancel</button>
+      </form>
+    </div>
+  ) : (
+    <button onClick={() => setIsAddingCandidate(true)}>Add Candidate</button>
+  )}
+</div>
+
   );
+  
 };
 
 export default Candidates;

@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc, getDocs, collection } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
+import Select from 'react-select';
+import '../css/admin.css';
 
 const Voters = ({ voters, setVoters }) => {
-  const [constituency, setConstituency] = useState({});
-
-  
+  const [constituency, setConstituency] = useState([]);
+  const [selectedConstituencies, setSelectedConstituencies] = useState({});
+  const [curr, setCurr] = useState({});
 
   useEffect(() => {
     const fetchVoters = async () => {
       try {
         const votersCollectionRef = collection(firestore, 'Voters');
+        const constituencyColRef = collection(firestore, 'constituency');
+
+        const constituencySnap = await getDocs(constituencyColRef);
         const votersSnapshot = await getDocs(votersCollectionRef);
 
         const votersData = [];
@@ -19,24 +24,31 @@ const Voters = ({ voters, setVoters }) => {
         });
 
         setVoters(votersData);
+
+        const constituenciesData = constituencySnap.docs.map((doc) => doc.data().name);
+        const constituencyOptions = constituenciesData.map((constituency) => ({
+          label: constituency,
+          value: constituency,
+        }));
+        setConstituency(constituencyOptions);
       } catch (error) {
         console.error('Error fetching voters:', error);
       }
     };
 
     fetchVoters();
-  }, []); 
+  }, [setVoters]);
 
-  const handleConstituencyChange = (e, voterId) => {
-    const { name, value } = e.target;
-    setConstituency((prevChanges) => ({
+  const handleConstituencyChange = (selectedConstituency, voterId) => {
+    setCurr(selectedConstituency);
+    setSelectedConstituencies((prevChanges) => ({
       ...prevChanges,
-      [voterId]: value,
+      [voterId]: selectedConstituency,
     }));
   };
 
   const handleApproveVoter = async (voterId) => {
-    const constituencyValue = constituency[voterId] || voters.find((voter) => voter.id === voterId)?.constituency;
+    const constituencyValue = curr;
 
     if (constituencyValue) {
       try {
@@ -44,7 +56,7 @@ const Voters = ({ voters, setVoters }) => {
         await updateDoc(voterDocRef, {
           isVerified: true,
           canVote: true,
-          constituency: constituency[voterId],
+          constituency: curr.value,
           // Add other fields you want to update
         });
 
@@ -62,26 +74,32 @@ const Voters = ({ voters, setVoters }) => {
   };
 
   return (
-    <div className="form-section">
-      <h2>Voters</h2>
+    <div className="box-container-voter">
+      <h2>Voters list to be Approved</h2>
       {voters.map((voter) => (
         // Check if voter is not verified before displaying
         !voter.isVerified && (
-          <div key={voter.id} className="voter-card">
-            <div>
-              Gov ID: {voter.govid} - Voter Name: {voter.firstname} {voter.lastname}
-              <label htmlFor={`constituencyInput-${voter.id}`}>
-                Constituency<span style={{ color: 'red' }}>*</span>
-              </label>
-              <input
-                type="text"
-                id={`constituencyInput-${voter.id}`}
-                name={`constituency-${voter.id}`}
-                value={constituency[voter.id] || voter.constituency || ''}
-                onChange={(e) => handleConstituencyChange(e, voter.id)}
-              />
+          <div key={voter.id} className="box-voter">
+            <div className="voter-info">
+              <div>
+                <p>Gov ID: {voter.govid}</p>
+                <p>Voter Name: {voter.firstname} {voter.lastname}</p>
+              </div>
+              <div>
+                <label htmlFor={`constituencyInput-${voter.id}`}>
+                  Constituency<span style={{ color: 'red' }}>*</span>
+                </label>
+                <Select
+                  placeholder={curr.value || 'Select Constituency'} // Display the selected constituency or a default message
+                  id={`constituencyInput-${voter.id}`}
+                  name={`constituency-${voter.id}`}
+                  options={constituency}
+                  value={selectedConstituencies[voter.id]}
+                  onChange={(selectedOption) => handleConstituencyChange(selectedOption, voter.id)}
+                />
+              </div>
             </div>
-            <div className="voter-buttons">
+            <div className='approve-button'>
               <button className="edit-button" onClick={() => handleApproveVoter(voter.id)}>
                 Approve
               </button>

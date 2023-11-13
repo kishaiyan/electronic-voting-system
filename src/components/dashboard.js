@@ -1,15 +1,84 @@
-import React from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, query , where } from 'firebase/firestore';
+import { firestore } from '../config/firebase'; import Select from 'react-select';
+import { Chart } from "react-google-charts";
+import '../css/admin.css';
 const Dashboard = () => {
   // Dummy data for the dashboard
-  const totalVotersRegistered = '10,000';
-  const totalVotesCasted = '5,000';
-  const totalPartiesRegistered = '10';
-  const totalCandidatesRegistered = '25';
+  const [totalVotersRegistered, setTotalVotersRegistered] = useState(0);
+  const [totalVotesCasted, setTotalVotesCasted] = useState(0);
+  const [totalPartiesRegistered, setTotalPartiesRegistered] = useState(0);
+  const [totalCandidatesRegistered, setTotalCandidatesRegistered] = useState(0);
+  const [constituencies,setConstituencies]=useState([]);
+  const [selectedConstituency, setSelectedConstituency] = useState(null);
+  const [voters,setVoters]=useState(0);
+  const [voted,setVoted]=useState(0);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const votersCollection = collection(firestore, 'Voters');
+        const votesCollection = collection(firestore, 'Votes');
+        const partiesCollection = collection(firestore, 'party');
+        const candidatesCollection = collection(firestore, 'candidates');
+        const constituenciesCollection = collection(firestore, 'constituency');
 
+        const votersSnapshot = await getDocs(votersCollection);
+        const votesSnapshot = await getDocs(votesCollection);
+        const partiesSnapshot = await getDocs(partiesCollection);
+        const candidatesSnapshot = await getDocs(candidatesCollection);
+        const constituenciesSnapshot = await getDocs(constituenciesCollection);
+
+        setTotalVotersRegistered(votersSnapshot.size);
+        setTotalVotesCasted(votesSnapshot.size);
+        setTotalPartiesRegistered(partiesSnapshot.size);
+        setTotalCandidatesRegistered(candidatesSnapshot.size);
+        const constituenciesData = constituenciesSnapshot.docs.map((doc) => doc.data().name);
+        const constituencyOptions = constituenciesData.map((constituency) => ({
+          label: constituency,
+          value: constituency,
+        }));
+        setConstituencies(constituencyOptions);
+       
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleConstituencyChange = async (selectedOption) => {
+    
+    try {
+      const votersCollectionRef = collection(firestore, 'Voters');
+    const numberOfVoters = query(votersCollectionRef, where('constituency', '==', selectedOption.value));
+    const votersSnapshot = await getDocs(numberOfVoters);
+    const numberVoted=query(
+      votersCollectionRef,
+      where('constituency', '==', selectedOption.value),
+      where('hasVoted', '==', true)
+    );
+    const votedSnapshot= await getDocs(numberVoted);
+
+    // Get the number of voters in the constituency
+    const votersCount = votersSnapshot.size;
+    const votedCount = votedSnapshot.size;
+    setVoted(votedCount);
+    setVoters(votersCount);
+    
+    }
+    catch(error){}
+    // Add any additional logic you need when the constituency changes
+  };
+   const chartData = [
+    ["Votes", "voted"],
+    ["Not Voted", voters-voted],
+    ["voted", voted],
+  ];
   return (
     <div>
-      <div className="stats-section">
+      <div className="stats-section box">
         <h2>Current Statistics</h2>
         <div className="box-container">
           <div className="box">
@@ -32,13 +101,23 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <div className="form-section">
-        {/* Add your chart or any other features here */}
+      <div className="form-section box">
         <h2>Chart Section</h2>
-        {/* Placeholder for a chart */}
-        <div className="chart-container">
-          {/* Add your chart component or code here */}
-          <p>Chart Goes Here</p>
+        <div className="chart-container box">
+        <Select
+        value={selectedConstituency}
+        onChange={handleConstituencyChange}
+        options={constituencies}
+        isSearchable
+        placeholder="Select Constituency"
+      />
+          <Chart
+      chartType="PieChart"
+      data={chartData}
+    
+      width={"100%"}
+      height={"400px"}
+    />
         </div>
       </div>
     </div>

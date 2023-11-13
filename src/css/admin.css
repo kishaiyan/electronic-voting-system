@@ -1,15 +1,33 @@
 /* Add these styles to your CSS file or component styles */
+/* Add this to your CSS */
+
 .admin-container {
   display: flex;
-  height: 100vh;
+  height: 100vh; /* Ensure the container takes up the full viewport height */
 }
 
 .sidebar {
   width: 200px;
+  max-height: 100%; /* Set maximum height to 100% of the container */
   background-color: #333;
   color: white;
   padding: 20px;
+  overflow-y: auto; /* Enable vertical scrolling when the content overflows */
 }
+
+.admin-dashboard {
+  flex: 1; /* Take up the remaining space */
+  overflow-y: auto; /* Enable scrolling for the content area */
+}
+
+.dashboard-header {
+  background-color: #ddd; /* You can customize the header background color */
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 
 .nav-links {
   list-style: none;
@@ -31,17 +49,7 @@
   background-color: #555;
 }
 
-.admin-dashboard {
-  flex: 1;
-  padding: 20px;
-}
 
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
 
 .header-actions button {
   background-color: #f00;
@@ -83,5 +91,87 @@
   margin-right: 20px;
   font-size: 1.2em;
 }
+
+/* Box.css */
+.box {
+  border: 1px solid #ddd;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.box-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+/* admin.css */
+.box-container-voter {
+  display: flex;
+  flex-direction: column;
+}
+
+.box-voter {
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+.box-container-candidate {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+
+
+.candidate-card img {
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
+  align-content: center;
+}
+
+.voter-buttons {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+
+.add-party-button {
+  display: block;
+  margin: auto;
+  padding: 8px 16px; /* Adjust padding as needed */
+}
+.approve-button {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;  /* Ensure the button takes the full height of the parent */
+}
+.candidate-card {
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.image-column {
+  flex: 0 0 auto;
+  margin-right: 20px;
+}
+
+.details-column {
+  flex: 1;
+}
+
+.edit-button {
+  margin-left: auto;
+}
+
+
+
+/* Add any other styling you need */
 
 /* Adjust the styles based on your design preferences */

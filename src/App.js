@@ -4,7 +4,6 @@ import Login from './Login'; // Import your Login component
 import Signup from './signup';
 import Homepage from './Home_page'; 
 import MFA from './mfa';
-import MfaSetup from './mfasetup';
 import Admin from './admin';
 
 function App() {
@@ -17,7 +16,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/homepage" element={<Homepage/>}/>
           <Route path="/mfa" element={<MFA />} /> 
-          <Route path="/mfasetup" element={<MfaSetup/>}/>
+          
           <Route path='/adminview' element={<Admin/>}/>
         </Routes>
       </div>

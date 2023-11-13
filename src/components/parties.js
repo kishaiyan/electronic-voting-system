@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, collection, getDocs, addDoc } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
+import '../css/admin.css';
 
 const Parties = () => {
   const [parties, setParties] = useState([]);
   const [isEditing, setIsEditing] = useState(null);
   const [editedParty, setEditedParty] = useState({});
+  const [newParty, setNewParty] = useState({ name: '' });
+  const [isAddingParty, setIsAddingParty] = useState(false);
 
   useEffect(() => {
     const fetchParties = async () => {
@@ -52,11 +55,26 @@ const Parties = () => {
     }
   };
 
+  const handleAddParty = async (e) => {
+    e.preventDefault();
+
+    try {
+      const newPartyRef = await addDoc(collection(firestore, 'party'), newParty);
+      const newPartyData = { id: newPartyRef.id, ...newParty };
+
+      setParties((prevParties) => [...prevParties, newPartyData]);
+      setNewParty({ name: '' });
+      setIsAddingParty(false);
+    } catch (error) {
+      console.error('Error adding new party:', error);
+    }
+  };
+
   return (
-    <div className="form-section">
+    <div className="box-container-voter">
       <h2>Parties</h2>
       {parties.map((party) => (
-        <div key={party.id} className="party-card">
+        <div key={party.id} className="box-voter">
           {isEditing === party.id ? (
             <div>
               <form onSubmit={(e) => handleSaveEditParty(e, party.id)}>
@@ -80,6 +98,24 @@ const Parties = () => {
           )}
         </div>
       ))}
+      {isAddingParty ? (
+        <div className="box-voter">
+          <form onSubmit={handleAddParty}>
+            <label htmlFor="newPartyName">Party Name:</label>
+            <input
+              type="text"
+              id="newPartyName"
+              value={newParty.name}
+              onChange={(e) => setNewParty({ ...newParty, name: e.target.value })}
+            />
+
+            <button type="submit">Add Party</button>
+            <button onClick={() => setIsAddingParty(false)}>Cancel</button>
+          </form>
+        </div>
+      ) : (
+        <button className="add-party-button" onClick={() => setIsAddingParty(true)}>Add Party</button>
+      )}
     </div>
   );
 };

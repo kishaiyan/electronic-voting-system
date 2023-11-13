@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { getAuth,signOut } from "firebase/auth";
 import Dashboard from './components/dashboard'
@@ -9,7 +9,7 @@ import './css/admin.css';
 
 
 const Admin = () => {
-  // ... your existing codeconst navigate=useNavigate();
+
   const navigate=useNavigate();
   const [user,setUser]=useState("");
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -23,6 +23,7 @@ const Admin = () => {
         navigate("/");
       })
       .catch((error) => {
+        
         console.error("Error signing out:", error);
       });
   };
