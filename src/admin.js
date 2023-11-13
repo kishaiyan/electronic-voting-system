@@ -6,6 +6,7 @@ import { firestore } from './config/firebase';
 import DatePicker from 'react-datepicker';
 import './css/admin.css';
 const Admin = () => {
+  const navigate=useNavigate();
   const [user,setUser]=useState("");
   const [activeSection, setActiveSection] = useState('dashboard');
   const [newParty, setNewParty] = useState('');
@@ -19,6 +20,8 @@ const Admin = () => {
   const [editedCandidate, setEditedCandidate] = useState([]);
   const [voters, setVoters] = useState([]);
   const [party, setParties] = useState([]);
+  const [isEditingParty,setIsEditingParty]=useState([]);
+  const [editedParty,setEditedParty]=useState([]);
   
   
 
@@ -61,10 +64,8 @@ const Admin = () => {
           });
 
           setVoters(votersData);
-          console.log(votersData);
-          
+         
 
-          // Fetch parties data
           const partiesCollectionRef = collection(firestore, 'party');
           const partiesSnapshot = await getDocs(partiesCollectionRef);
           const partiesData = [];
@@ -78,11 +79,6 @@ const Admin = () => {
         } catch (error) {
           console.error('Error fetching data:', error);
         }
-
-
-
-
-        
       }
     });
 
@@ -90,13 +86,29 @@ const Admin = () => {
     return () => unsubscribe();
   }, []);
 
-  const startEditing = (candidateId) => {
+  const startEditingCandidate = (candidateId) => {
     setIsEditing(candidateId);
     setEditedCandidate({ ...candidates.find((c) => c.id === candidateId) });
   };
+  const startEditingParty = (partyId) => {
+    setIsEditingParty(partyId);
+    setEditedParty({ ...party.find((c) => c.id === partyId) });
+  };
+  
+  
+ 
 
   const handleSignOut = () => {
-    console.log("User logged off");
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        setUser(null);
+        console.log("User logged off");
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("Error signing out:", error);
+      });
   };
   const handleSaveEdit = async (e, candidateId) => {
     e.preventDefault();
@@ -125,35 +137,33 @@ const Admin = () => {
       console.error('Error updating candidate:', error);
     }
   };
-  
-
   // Form submission handlers
 
   const toggleAddPartyPopup = () => {
     setShowAddPartyPopup(!showAddPartyPopup);
   };
 
-  const handleAddParty = (e) => {
+  const handleAddParty = async (e) => {
     e.preventDefault();
-    console.log('Party added:', newParty);
-    setNewParty('');
-    // Placeholder for success message
+    try {
+      const partyCollectionRef = collection(firestore, 'party');
+      const newPartyDocRef = await addDoc(partyCollectionRef, {
+        name: newParty,
+      });
+      const newPartyId = newPartyDocRef.id;
+  
+      setParties((prevParties) => [
+        ...prevParties,
+        { id: newPartyId, name: newParty },
+      ]);
+  
+      setNewParty('');
+      setShowAddPartyPopup(false);
+    } catch (error) {
+      console.error('Error adding party to Firestore:', error);
+    }
   };
-
-  const handleDeleteParty = () => {
-    // Placeholder for handling party deletion
-    console.log(`Delete party with ID`);
-    // Implement the logic to delete the party with the given ID
-  };
-
-  const handleEditParty = (partyId) => {
-    // Placeholder for handling party modification
-    console.log(`Modify party with ID ${partyId}`);
-    // Implement the logic to modify the party with the given ID
-  };
-
- 
-
+  
   const handleAddCandidate = async(e) => {
     e.preventDefault();
     try {
@@ -164,6 +174,7 @@ const Admin = () => {
         lastname: newCandidate.lastname,
         party: newCandidate.party,
         constituency: newCandidate.constituency,
+        imageURL:newCandidate.imageURL,
         // Add other fields for a new candidate
       });
 
@@ -192,7 +203,7 @@ const Admin = () => {
       console.error('Error adding candidate to Firestore:', error);
     }
   };
-
+  
 
   const handleSetVotingDate = (date) => {
     setVotingDate(date);
@@ -206,18 +217,52 @@ const Admin = () => {
     setNotification('');
     // Placeholder for success message
   };
+  const handleSaveEditParty=async(e,partyId)=>{
+    e.preventDefault();
+    try{
+      
+      const partyDocRef=doc(firestore,'party',partyId)
+      await updateDoc(partyDocRef,{
+        name:editedParty.party,
+      })
+       // Update the local state with the edited data
+       setParties((prevParties) =>
+      prevParties.map((party) =>
+        party.id === partyId ? { ...party, name: editedParty.party } : party
+      )
+    );
+ 
+     // Exit editing mode
+     setIsEditingParty(null);
+    }
+    catch(error){
+      console.log(error);
+    }
+  }
+  
 
-  const handleDeleteVoter = (voterId) => {
-    // Placeholder for handling voter deletion
-    console.log(`Delete voter with ID ${voterId}`);
-    // Implement the logic to delete the voter with the given ID
+  const handleApproveVoter = async (voterId) => {
+    try {
+      const voterDocRef = doc(firestore, 'Voters', voterId);
+      await updateDoc(voterDocRef, {
+        isVerified: true,
+        canVote: true,
+        // Add other fields you want to update
+      });
+      console.log("user verified to vote");
+  
+      // Update local state to trigger re-render
+      setVoters((prevVoters) =>
+        prevVoters.map((voter) =>
+          voter.id === voterId ? { ...voter, isVerified: true, canVote: true } : voter
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
-
-  const handleApproveVoter = (voterId) => {
-    // Placeholder for handling voter modification
-    console.log(`Modify voter with ID ${voterId}`);
-    // Implement the logic to modify the voter with the given ID
-  };
+  
+  
 
 
   // Dummy data for the admin dashboard
@@ -305,13 +350,25 @@ const Admin = () => {
              
               {party.map((party) => (
                 <div key={party.id} className="party-card">
+                {isEditingParty === party.id ? (
+                  <form onSubmit={(e) => handleSaveEditParty(e, party.id)}>
+                    <label htmlFor={`editParty-${party.id}`}>Party:</label>
+                    <input
+                      type="text"
+                      id={`editParty-${party.id}`}
+                      value={editedParty.party}
+                      onChange={(e) => setEditedParty({ ...editedParty, party: e.target.value })}
+                      />
+                    <button type="submit">Save</button>
+                    <button onClick={() => setIsEditingParty(null)}>Cancel</button>
+                  </form>
+                ) : (
                   <div>
-                    {party.name} 
+                    Party Name: {party.name}
+                    <button onClick={() => startEditingParty(party.id)}>edit</button>
                   </div>
-                  <div className="party-buttons">
-                    <button className="edit-button" onClick={() => handleEditParty(party.id)}>Edit</button>
-                    <button className="delete-button" onClick={() => handleDeleteParty(party.id)}>Delete</button>
-                  </div>
+                )}
+                
                 </div>
               ))}
               
@@ -320,13 +377,6 @@ const Admin = () => {
                 <div className="party-popup">
                   <form onSubmit={handleAddParty}>
                     <input type="text" placeholder="Party Name" value={newParty} onChange={(e) => setNewParty(e.target.value)} />
-                    <input type="text" placeholder="Party Abbreviation" /* ... */ />
-                    <input type="text" placeholder="Party Leader" /* ... */ />
-                    <input type="text" placeholder="Headquarters Address" /* ... */ />
-                    <input type="email" placeholder="Contact Email" /* ... */ />
-                    <textarea placeholder="Party Ideology" /* ... */ ></textarea>
-                    <input type="date" placeholder="Established Date" /* ... */ />
-                    <input type="file" /* ... */ />
                     <button type="submit">Add Party</button>
                   </form>
                 </div>
@@ -389,7 +439,7 @@ const Admin = () => {
                         style={{ width: '100px', height: '100px', paddingLeft: '20px' }}
                       />
                       {candidate.firstname} {candidate.lastname} - Party: {candidate.party}, Constituency: {candidate.constituency}
-                      <button className="edit-button" onClick={() => startEditing(candidate.id)}>
+                      <button className="edit-button" onClick={() => startEditingCandidate(candidate.id)}>
                         Edit
                       </button>
                     </div>
@@ -435,7 +485,7 @@ const Admin = () => {
             value={newCandidate.constituency}
             onChange={(e) => setNewCandidate({ ...newCandidate, constituency: e.target.value })}
           />
-          <label htmlFor="newConstituency">Image:</label>
+          <label htmlFor="newImagey">Image:</label>
           <input
             type="text"
             id="newImage"
@@ -450,22 +500,26 @@ const Admin = () => {
         </form>
       </div>
     )}
-          {activeSection === 'voters' && (
-            <div className="form-section">
-              <h2>Voters</h2>
-              {voters.map((voter) => (
-                <div key={voter.id} className="voter-card">
-                  <div>
-                  Gov ID: {voter.govID} - Voter ID: {voter.voterId}
-                  </div>
-                  <div className="voter-buttons">
-                    <button className="edit-button" onClick={() => handleApproveVoter(voter.id)}>Approve</button>
-                    <button className="delete-button" onClick={() => handleDeleteVoter(voter.id)}>Delete</button>
-                  </div>
-                </div>
-              ))}
+    {activeSection === 'voters' && (
+      <div className="form-section">
+        <h2>Voters</h2>
+        {voters.map((voter) => (
+          // Check if voter is not verified before displaying
+          !voter.isVerified && (
+            <div key={voter.id} className="voter-card">
+              <div>
+                Gov ID: {voter.govid} - Voter Name: {voter.firstname} {voter.lastname}
+              </div>
+              <div className="voter-buttons">
+                <button className="edit-button" onClick={() => handleApproveVoter(voter.id)}>Approve</button>
+              </div>
             </div>
-          )}
+          )
+        ))}
+      </div>
+    )}
+    
+    
 
         </div>
       </div>
