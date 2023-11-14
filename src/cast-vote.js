@@ -5,7 +5,7 @@ import {collection,getDocs,query,where,addDoc} from "firebase/firestore";
 import {firestore} from "./config/firebase";
 import {getAuth} from "firebase/auth";
 import { updateDoc, doc } from "firebase/firestore";
-
+import './css/cast-vote.css';
 const CastVote = () =>{
     const currentUser = getAuth().currentUser;
     const [selectedSection, setSelectedSection] = useState('');
@@ -121,59 +121,57 @@ useEffect(() => {
 
     return (
         <div className="voting-container">
-            <button onClick={() => handleVoteSelection('above')}>Vote Above the Line</button>
-            <button onClick={() => handleVoteSelection('below')}>Vote Below the Line</button>
+            <div className="voting-buttons">
+                <button onClick={() => handleVoteSelection('above')}>Vote Above the Line</button>
+                <button onClick={() => handleVoteSelection('below')}>Vote Below the Line</button>
+            </div>
 
             {selectedSection && (
-                <form onSubmit={handleSubmitVote}>
+                <form onSubmit={handleSubmitVote} className="voting-form">
                     {selectedSection === 'above' ? (
-                        <div className="above-the-line">
+                        <div className="above-the-line voting-section">
                             <h3>Above the Line</h3>
-                            {/* Render checkboxes for parties */}
-                            {/* Repeat for each party */}
-
-
-                            {party.map((partyItem) => (
-                                <label key={partyItem.id}>
-                                    <input
-                                        type="checkbox"
-                                        onChange={(e) => handleCheckboxChange(e, partyItem.id, partyItem.name)}
-                                        checked={voteOrderAbove.some(vote => vote.id === partyItem.id)}
-                                    />
-                                    {partyItem.name}
-                                </label>
-                            ))}
-
-
-                            {/* ... more parties ... */}
+                            <div className="party-list">
+                                {party.map((partyItem) => (
+                                    <label key={partyItem.id} className="party-item">
+                                        <input
+                                            type="checkbox"
+                                            onChange={(e) => handleCheckboxChange(e, partyItem.id, partyItem.name)}
+                                            checked={voteOrderAbove.some(vote => vote.id === partyItem.id)}
+                                        />
+                                        {partyItem.name}
+                                    </label>
+                                ))}
+                            </div>
                         </div>
                     ) : (
-                        <div className="below-the-line">
+                        <div className="below-the-line voting-section">
                             <h3>Below the Line</h3>
-                            {/* Render checkboxes for candidates */}
-                            {/* Repeat for each party and candidates */}
-                            {candidates.map((candidate) => (
-                                <div key={candidate.id} className="party">
-                                    <h4>{candidate.party}</h4>
-                                    <div className="candidates">
-                                        <label>
+                            <div className="candidates-grid">
+                                {candidates.map((candidate) => (
+                                    <div key={candidate.id} className="candidate-item">
+                                        <h4>{candidate.party}</h4>
+                                        <label htmlFor={`candidate-${candidate.id}`}>
                                             <input
                                                 type="checkbox"
+                                                id={`candidate-${candidate.id}`}
                                                 onChange={(e) => handleCheckboxChange(e, candidate.id, `${candidate.firstname} ${candidate.lastname}`)}
                                                 checked={voteOrderBelow.some(vote => vote.id === candidate.id)}
                                             />
                                             {candidate.firstname} {candidate.lastname}
                                         </label>
                                     </div>
-                                </div>
-                            ))}
-                            {/* ... more candidates ... */}
+                                ))}
+                            </div>
                         </div>
                     )}
-                    <button type="submit">Submit Vote</button>
+                    <div className="submit-button-container">
+                        <button type="submit" className="submit-vote">Submit Vote</button>
+                    </div>
                 </form>
             )}
         </div>
+
     );
 };
 
