@@ -70,10 +70,10 @@ const Login = () => {
 
       // Check the user's role and navigate accordingly
       if (userRole === "admin") {
-        
+        console.log('admin');
         navigate("/adminview");
       } else {
-       
+       console.log('user');
         navigate("/homepage");
       }
     } else {

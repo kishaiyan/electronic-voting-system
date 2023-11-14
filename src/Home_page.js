@@ -50,9 +50,12 @@ const Homepage = () => {
               govid: userData.govid,
               isVerified:userData.isVerified,
               canVote:userData.canVote,
+              hasVoted:userData.hasVoted,
               constituency:userData.constituency,
             });
           }
+          console.log('user.canVote:', user.canVote);
+          console.log('user.hasVoted:', user.hasVoted);
           setIsLoading(false);
         } catch (error) {
           setError(error);
@@ -77,7 +80,8 @@ const Homepage = () => {
           <h2>Welcome, {user.firstname} {user.lastname}</h2>
           <p>Your GovId: {user.govid}</p>
           {user.isVerified ? (
-            user.canVote ? (
+            
+            user.canVote  && !user.hasVoted?(
               <div>
                 <p>You are now eligible to cast your vote.</p>
                 <button onClick={handleCastVote}>Cast Vote</button>

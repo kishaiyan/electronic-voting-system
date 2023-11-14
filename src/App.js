@@ -5,7 +5,7 @@ import Signup from './signup';
 import Homepage from './Home_page'; 
 import MFA from './mfa';
 import Admin from './admin';
-
+import CastVote from './cast-vote';
 function App() {
   return (
     <Router>
@@ -16,7 +16,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/homepage" element={<Homepage/>}/>
           <Route path="/mfa" element={<MFA />} /> 
-          
+          <Route path="/cast-vote" element={<CastVote/>}/>
           <Route path='/adminview' element={<Admin/>}/>
         </Routes>
       </div>

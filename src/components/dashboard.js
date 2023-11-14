@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query , where } from 'firebase/firestore';
-import { firestore } from '../config/firebase'; import Select from 'react-select';
+import { firestore } from '../config/firebase';
+ import Select from 'react-select';
 import { Chart } from "react-google-charts";
 import '../css/admin.css';
 const Dashboard = () => {
@@ -11,26 +12,31 @@ const Dashboard = () => {
   const [totalCandidatesRegistered, setTotalCandidatesRegistered] = useState(0);
   const [constituencies,setConstituencies]=useState([]);
   const [selectedConstituency, setSelectedConstituency] = useState(null);
-  const [voters,setVoters]=useState(0);
+  const [pvoters,setVotersp]=useState(0);
+  const [cvoters,setVotersc]=useState(0);
   const [voted,setVoted]=useState(0);
+  const [voters,setVoters]=useState(0);
   
   useEffect(() => {
     const fetchData = async () => {
       try {
         const votersCollection = collection(firestore, 'Voters');
-        const votesCollection = collection(firestore, 'Votes');
+        const partyvotesCollection = collection(firestore, 'VotesParty');
+        const candvotesCollection=collection(firestore,'VotesCandidate');
         const partiesCollection = collection(firestore, 'party');
         const candidatesCollection = collection(firestore, 'candidates');
         const constituenciesCollection = collection(firestore, 'constituency');
 
         const votersSnapshot = await getDocs(votersCollection);
-        const votesSnapshot = await getDocs(votesCollection);
+        const partyvotesSnapshot = await getDocs(partyvotesCollection);
+        const candvotersSnapshot= await getDocs(candvotesCollection);
         const partiesSnapshot = await getDocs(partiesCollection);
         const candidatesSnapshot = await getDocs(candidatesCollection);
         const constituenciesSnapshot = await getDocs(constituenciesCollection);
 
         setTotalVotersRegistered(votersSnapshot.size);
-        setTotalVotesCasted(votesSnapshot.size);
+        setVotersp(partyvotesSnapshot.size);
+        setVotersc(candvotersSnapshot.size);
         setTotalPartiesRegistered(partiesSnapshot.size);
         setTotalCandidatesRegistered(candidatesSnapshot.size);
         const constituenciesData = constituenciesSnapshot.docs.map((doc) => doc.data().name);
@@ -87,7 +93,7 @@ const Dashboard = () => {
           </div>
           <div className="box">
             <h3>Total Votes Casted</h3>
-            <p>{totalVotesCasted}</p>
+            <p>{pvoters+cvoters}</p>
           </div>
         </div>
         <div className="box-container">

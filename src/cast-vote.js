@@ -98,6 +98,7 @@ useEffect(() => {
                     votes: votes,
                     votedAt: new Date(),
                     section: selectedSection,
+                    constituency:constituency,
                 });
 
                 console.log("Votes document written with ID: ", docRef.id);
