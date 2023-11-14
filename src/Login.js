@@ -26,7 +26,7 @@ const Login = () => {
     try {
       
       // Initialize Firebase Auth
-      const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
+      const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {size:'invisible'});
       try {
          await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
