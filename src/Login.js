@@ -26,7 +26,9 @@ const Login = () => {
     try {
       
       // Initialize Firebase Auth
-      const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
+      const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {
+        size: 'invisible'
+      });
       try {
          await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -70,10 +72,10 @@ const Login = () => {
 
       // Check the user's role and navigate accordingly
       if (userRole === "admin") {
-        
+        console.log("User is an Admin");
         navigate("/adminview");
       } else {
-       
+        console.log("User is a voter");
         navigate("/homepage");
       }
     } else {

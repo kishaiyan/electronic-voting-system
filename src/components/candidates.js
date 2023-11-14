@@ -62,7 +62,19 @@ const Candidates = () => {
     setIsEditing(candidateId);
     setEditedCandidate({ ...candidates.find((c) => c.id === candidateId) });
   };
+  const handleConstituencyChange = (selectedOption) => {
+    setNewCandidate(prevState => ({
+      ...prevState,
+      constituency: selectedOption.value
+    }));
+  };
 
+  const handlePartyChange = (selectedOption) => {
+    setNewCandidate(prevState => ({
+      ...prevState,
+      party: selectedOption.value
+    }));
+  };
   const handleSaveEdit = async (e, candidateId) => {
     e.preventDefault();
 
@@ -164,9 +176,7 @@ const Candidates = () => {
         </div>
       ) : (
         <div className="candidate-info">
-          <div className="image-column">
-           
-          </div>
+    
           <div className="details-column">
             <p>Name: {candidate.firstname} {candidate.lastname}</p>
             <p>Party: {candidate.party}</p>
@@ -208,21 +218,35 @@ const Candidates = () => {
 
       <label htmlFor="newConstituency">Constituency:</label>
       <Select
-        value={newCandidate.constituency}
-        onChange={(e)=>setNewCandidate({...newCandidate, constituency: e.target.value})}
-        options={constituencies}
-        isSearchable
-        placeholder="Select Constituency"
-      />
+    id="newConstituency"
+    value={constituencies.find(option => option.value === newCandidate.constituency)}
+    onChange={handleConstituencyChange}
+    options={constituencies}
+    isSearchable
+    placeholder="Select Constituency"
+    styles={{
+        control: (provided) => ({
+            ...provided,
+            width: '250px'
+        }),
+    }}
+/>
       <label htmlFor="newParty">Party:</label>
       
       <Select
-        value={newCandidate.party}
-        onChange={(e)=>setNewCandidate({...newCandidate, party: e.target.value})}
-        options={parties}
-        isSearchable
-        placeholder="Select party"
-      />
+    id="newParty"
+    value={parties.find(option => option.value === newCandidate.party)}
+    onChange={handlePartyChange}
+    options={parties}
+    isSearchable
+    placeholder="Select Party"
+    styles={{
+        control: (provided) => ({
+            ...provided,
+            width: '250px'
+        }),
+    }}
+/>
         <button type="submit">Add Candidate</button>
         <button onClick={() => setIsAddingCandidate(false)}>Cancel</button>
       </form>
