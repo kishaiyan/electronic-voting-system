@@ -1,49 +1,53 @@
 /* SignUp.css */
 
 .sign-up-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    padding: 20px;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+
+.sign-up-form {
+  width: 400px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.8); /* Transparent white background */
+}
+
+.sign-up-input,
+.sign-up-button,
+.date-picker {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.sign-up-button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 600px) {
   .sign-up-form {
-    width: 400px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .sign-up-input, .sign-up-button, .date-picker {
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 100%;
-  }
-  
-  .sign-up-button {
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-  }
-  
-  /* Responsive Styles */
-  @media screen and (max-width: 600px) {
-    .sign-up-form {
       width: 100%;
       margin: 0 10px;
-    }
-  
-    .sign-up-input, .sign-up-button, .date-picker {
-      font-size: 14px;
-    }
-  
-    h2 {
-      font-size: 20px;
-    }
   }
-  
+
+  .sign-up-input,
+  .sign-up-button,
+  .date-picker {
+      font-size: 14px;
+  }
+
+  h2 {
+      font-size: 20px;
+  }
+}

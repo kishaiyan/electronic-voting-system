@@ -9,7 +9,6 @@ signInWithEmailAndPassword} from "firebase/auth";
 import './css/Login.css';
 import { getFirestore,getDoc,doc } from "firebase/firestore";
 
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,13 +21,14 @@ const Login = () => {
   
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
       
       // Initialize Firebase Auth
       const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
       try {
-         await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        navigate("/adminview");
       } catch (err) {
         if (err.code === 'auth/multi-factor-auth-required') {
           const resolver = getMultiFactorResolver(auth, err);
@@ -70,10 +70,10 @@ const Login = () => {
 
       // Check the user's role and navigate accordingly
       if (userRole === "admin") {
-        
+        console.log("User is an admin. Navigating to admin view.");
         navigate("/adminview");
       } else {
-       
+        console.log("User is a regular user. Navigating to homepage.");
         navigate("/homepage");
       }
     } else {
@@ -83,12 +83,11 @@ const Login = () => {
     console.error("Error verifying OTP:", error);
   }
 };
-
-  
 return (
+  <div className="page-container">
   <div className="login-container">
     <div className="login-card">
-      <h2>Login</h2>
+      <h2>Electronic Voting System</h2>
       <form onSubmit={handleLogin} className="login-form">
         <input
           type="email"
@@ -104,9 +103,12 @@ return (
           onChange={(e) => setPassword(e.target.value)}
           className="login-input"
         />
-        <button className="login-button" type="submit">Log In</button>
+        <button className="login-button green" type="submit">Log In</button>
+        <p className="forgot-password-link">
+          <Link to={"/forgot-password"}>Forgot Password?</Link>
+        </p>
         <div id="recaptcha" className="recaptcha"></div>
-        {otpsent ? (
+        {otpsent && (
           <div>
             <input
               placeholder="Enter OTP"
@@ -116,7 +118,8 @@ return (
             />
             <button onClick={verifyOTP} className="otp-button">Verify OTP</button>
           </div>
-        ) : (
+        )}
+        {!otpsent && (
           <p className="signup-link">
             Don't have an account? <Link to={"/signup"}>Sign Up</Link>
           </p>
@@ -124,7 +127,10 @@ return (
       </form>
     </div>
   </div>
+</div>
+
 );
 };
 
 export default Login;
+
