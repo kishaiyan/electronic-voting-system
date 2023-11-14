@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAuth, multiFactor, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { firestore } from './config/firebase';
@@ -10,8 +10,7 @@ const Homepage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const [isEnrolled, setIsEnrolled] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+
 
   // Function to handle signing out
   const handleSignOut = () => {
@@ -53,6 +52,7 @@ const Homepage = () => {
               canVote:userData.canVote,
             });
           }
+          setIsLoading(false);
         } catch (error) {
           setError(error);
   

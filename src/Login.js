@@ -22,14 +22,13 @@ const Login = () => {
   
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     try {
       
       // Initialize Firebase Auth
       const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        navigate("/adminview");
+         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
         if (err.code === 'auth/multi-factor-auth-required') {
           const resolver = getMultiFactorResolver(auth, err);
@@ -71,10 +70,10 @@ const Login = () => {
 
       // Check the user's role and navigate accordingly
       if (userRole === "admin") {
-        console.log("User is an admin. Navigating to admin view.");
+        
         navigate("/adminview");
       } else {
-        console.log("User is a regular user. Navigating to homepage.");
+       
         navigate("/homepage");
       }
     } else {
