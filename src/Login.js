@@ -26,7 +26,7 @@ const Login = () => {
     try {
       
       // Initialize Firebase Auth
-      const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
+      const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {size:'invisible'});
       try {
          await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -55,34 +55,39 @@ const Login = () => {
   
   const verifyOTP = async () => {
     try {
-      // Verify the OTP using the confirmation object
-
-      const cred = PhoneAuthProvider.credential(
-        verificationId, otp);
-    const multiFactorAssertion =
-        PhoneMultiFactorGenerator.assertion(cred);
-    // Complete sign-in.
-     resolver.resolveSignIn(multiFactorAssertion)
-     const userDocRef=doc(getFirestore(),"User",auth.currentUser.uid);
-     const userdoc=await getDoc(userDocRef);
-     if (userdoc.exists()) {
-      const userRole = userdoc.data().role;
-
-      // Check the user's role and navigate accordingly
-      if (userRole === "admin") {
-        console.log('admin');
-        navigate("/adminview");
+      const cred = PhoneAuthProvider.credential(verificationId, otp);
+      const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
+  
+      // Complete sign-in.
+      await resolver.resolveSignIn(multiFactorAssertion);
+  
+      // Reset the OTP state
+      setOtp("");
+  
+      const userDocRef = doc(getFirestore(), "User", auth.currentUser.uid);
+      const userdoc = await getDoc(userDocRef);
+  
+      if (userdoc.exists()) {
+        const userRole = userdoc.data().role;
+  
+        // Check the user's role and navigate accordingly
+        if (userRole === "admin") {
+          console.log('admin');
+          navigate("/adminview");
+        } else {
+          console.log('user');
+          navigate("/homepage");
+        }
       } else {
-       console.log('user');
-        navigate("/homepage");
+        console.error("User document not found.");
       }
-    } else {
-      console.error("User document not found.");
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+  
+      // Handle OTP verification errors, e.g., display a message to the user
     }
-  } catch (error) {
-    console.error("Error verifying OTP:", error);
-  }
-};
+  };
+  
 
   
 return (

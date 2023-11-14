@@ -6,13 +6,19 @@ import { firestore } from './config/firebase';
 import './css/homepage.css';
 
 const Homepage = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  let logoutTimeout;
 
+  const resetTimer = () => {
+    clearTimeout(logoutTimeout);
+    logoutTimeout = setTimeout(() => {
+      handleSignOut();
+    }, 300000); // 5 minutes in milliseconds
+  };
 
-  // Function to handle signing out
   const handleSignOut = () => {
     const auth = getAuth();
     signOut(auth)
@@ -48,30 +54,39 @@ const Homepage = () => {
               firstname: userData.firstname,
               email: userData.email,
               govid: userData.govid,
-              isVerified:userData.isVerified,
-              canVote:userData.canVote,
-              hasVoted:userData.hasVoted,
-              constituency:userData.constituency,
+              isVerified: userData.isVerified,
+              canVote: userData.canVote,
+              hasVoted: userData.hasVoted,
+              constituency: userData.constituency,
             });
           }
-          console.log('user.canVote:', user.canVote);
-          console.log('user.hasVoted:', user.hasVoted);
           setIsLoading(false);
         } catch (error) {
           setError(error);
-  
         }
       }
     };
 
+    const userActivityHandler = () => {
+      resetTimer(); // Reset the timer on user activity
+    };
+
     const unsubscribe = onAuthStateChanged(auth, fetchData);
 
-    return () => unsubscribe();
-  }, []);
+    // Attach event listeners to track user activity
+    window.addEventListener('mousemove', userActivityHandler);
+    window.addEventListener('keydown', userActivityHandler);
 
-  const handleEnrollMfa = () => {
-    navigate("/mfa");
-  };
+    // Initial setup
+    resetTimer();
+
+    return () => {
+      // Clean up event listeners and timers when the component is unmounted
+      window.removeEventListener('mousemove', userActivityHandler);
+      window.removeEventListener('keydown', userActivityHandler);
+      clearTimeout(logoutTimeout);
+    };
+  }, []);
 
   return (
     <div className="homepage-container">
@@ -80,8 +95,7 @@ const Homepage = () => {
           <h2>Welcome, {user.firstname} {user.lastname}</h2>
           <p>Your GovId: {user.govid}</p>
           {user.isVerified ? (
-            
-            user.canVote  && !user.hasVoted?(
+            user.canVote && !user.hasVoted ? (
               <div>
                 <p>You are now eligible to cast your vote.</p>
                 <button onClick={handleCastVote}>Cast Vote</button>
@@ -90,7 +104,6 @@ const Homepage = () => {
               <p> You are not eligible to Vote</p>
             )
           ) : <p>Your profile is under verification</p>}
-          
           <button onClick={handleSignOut}>Sign Out</button>
         </div>
       ) : (
