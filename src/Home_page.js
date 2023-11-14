@@ -27,7 +27,7 @@ const Homepage = () => {
   };
 
   const handleCastVote = () => {
-    navigate("/cast-vote");
+    navigate(`/cast-vote?constituency=${user.constituency}`);
   };
 
   useEffect(() => {
@@ -50,6 +50,7 @@ const Homepage = () => {
               govid: userData.govid,
               isVerified:userData.isVerified,
               canVote:userData.canVote,
+              constituency:userData.constituency,
             });
           }
           setIsLoading(false);
