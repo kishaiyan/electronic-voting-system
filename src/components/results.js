@@ -75,6 +75,7 @@ const Results=()=>{
   
   return(
     <div>
+    <h1>Results</h1>
     <label htmlFor="constituencyDropdown">Select Constituency:</label>
       <Select
         id="constituencyDropdown"
@@ -84,7 +85,7 @@ const Results=()=>{
         isSearchable
         placeholder={selectedConstituency ? selectedConstituency.value : "Select Constituency"}
       />
-    <div>Results</div>
+   
     <div> Party Votes</div>
     {partychartData?(<div>
         <Chart

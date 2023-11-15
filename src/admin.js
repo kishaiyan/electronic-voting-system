@@ -7,6 +7,7 @@ import Candidates from "./components/candidates";
 import Parties from "./components/parties";
 import Results from "./components/results";
 import './css/admin.css';
+import Constituency from "./components/constituency";
 
 
 const Admin = () => {
@@ -37,6 +38,7 @@ const Admin = () => {
           <a href="#voters" onClick={() => setActiveSection('voters')}>Voters</a>
           <a href="#candidates" onClick={() => setActiveSection('candidates')}>Candidates</a>
           <a href="#parties" onClick={() => setActiveSection('parties')}>Parties</a>
+          <a href="#constituency" onClick={()=>setActiveSection('constituency')}>Constituency</a>
           <a href="#Results" onClick={()=> setActiveSection('results')}>Results</a>
         </ul>
       </nav>
@@ -51,6 +53,7 @@ const Admin = () => {
         {activeSection === 'voters' && <Voters voters={voters} setVoters={setVoters} />}
         {activeSection === 'candidates' && <Candidates/>}
         {activeSection === 'parties' && <Parties/>}
+        {activeSection === 'constituency' && <Constituency/>}
         {activeSection === 'results' && <Results/>}
       </div>
     </div>
