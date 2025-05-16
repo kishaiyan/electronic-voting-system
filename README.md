@@ -34,3 +34,24 @@ A secure, decentralized, and scalable electronic voting platform developed with 
 ```bash
 git clone https://github.com/kishaiyan/electronic-voting-system.git
 
+```
+### 2. Install Dependency
+
+``` code
+npm install
+```
+
+### 3. Firebase Setup
+
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
+VITE_FIREBASE_APP_ID=your_app_id
+
+### 4. Run the development server
+
+```bash
+nom run dev
+```
